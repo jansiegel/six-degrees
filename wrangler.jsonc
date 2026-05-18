@@ -1,0 +1,12 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "six-degrees",
+    "compatibility_date": "2025-05-12",
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "six-degrees",
+            "database_id": "585ecccb-e210-4cf9-a865-819977806450"
+        }
+    ]
+}

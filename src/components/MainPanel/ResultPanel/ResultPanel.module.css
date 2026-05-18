@@ -1,0 +1,6 @@
+h1.bookend {
+    text-shadow:
+        1px 1px 0 var(--color-poster-shadow),
+        2px 2px 0 var(--color-poster-shadow),
+        3px 3px 0 var(--color-poster-shadow)
+}

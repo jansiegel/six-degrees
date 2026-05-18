@@ -1,0 +1,19 @@
+h1.title {
+    text-shadow:
+        1px 1px 0 var(--color-poster-shadow),
+        2px 2px 0 var(--color-poster-shadow),
+        3px 3px 0 var(--color-poster-shadow),
+        4px 4px 0 var(--color-poster-shadow),
+        5px 5px 0 var(--color-poster-shadow),
+        6px 6px 0 var(--color-poster-shadow),
+        7px 7px 0 var(--color-poster-shadow),
+        8px 8px 0 var(--color-poster-shadow),
+        9px 9px 0 var(--color-poster-shadow),
+        10px 10px 0 var(--color-poster-shadow),
+        11px 11px 0 var(--color-poster-shadow),
+        12px 12px 0 var(--color-poster-shadow),
+        13px 13px 0 var(--color-poster-shadow),
+        14px 14px 0 var(--color-poster-shadow),
+        15px 15px 0 var(--color-poster-shadow),
+        16px 16px 0 var(--color-poster-shadow);
+}

@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+@theme {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --color-poster-bg-orange: #f94927ff;
+  --color-poster-font: #f7f6f1ff;
+  --color-poster-shadow: #331c12ff;
+  --color-poster-light-bg: #f0ece3ff;
+  --color-page-bg: #272e26ff;
+  --color-footer: #5b5b5b;
+}

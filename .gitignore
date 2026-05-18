@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+/.playwright
 
 # next.js
 /.next/
@@ -41,3 +44,21 @@ yarn-error.log*
 next-env.d.ts
 
 .idea
+
+# wrangler local state (Miniflare local D1, KV cache etc.)
+.wrangler/
+
+# Local SQLite files produced by ETL — large, generated artifacts
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# IDE / tool settings (per-dev)
+.claude/
+.vscode/
+
+# MusicBrainz dump files (kept locally in ~/mb-data, but guard against accidental commits)
+mbdump/
+mbdump.tar.bz2
