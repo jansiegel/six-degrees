@@ -7,6 +7,7 @@ import type { Outcome } from '../MainPanel';
 import { Button } from '@/components/Button/Button';
 import { buildPathEntries } from './buildPathEntries';
 import type { BandRole } from './buildPathEntries';
+import { MAX_DEPTH } from '@/lib/db/max-depth';
 import styles from './ResultPanel.module.css';
 
 type ResultPanelProps = {
@@ -118,7 +119,7 @@ export const ResultPanel = ({ outcome, onReset, className }: ResultPanelProps) =
             </div>
             {path === null ? (
                 <div className={clsx(ENTRY_CLASSES)}>
-                    <h2 className={clsx(ENTRY_HEADING_CLASSES)}>No connection found within 7 hops.</h2>
+                    <h2 className={clsx(ENTRY_HEADING_CLASSES)}>No connection found within {MAX_DEPTH} hops.</h2>
                 </div>
             ) : (
                 entries.map((entry, index) => (

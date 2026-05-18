@@ -2,9 +2,11 @@ import 'server-only';
 import Database from 'better-sqlite3';
 import type { ArtistsRepo } from './repo';
 import { RELATION_TYPE } from './relations';
+import { bidirectionalBfs } from './bidirectional-bfs';
+import { MAX_DEPTH } from './max-depth';
 import type { Artist, Frontman, PathEdge, PathResult } from './types';
 
-export const MAX_DEPTH = 7;
+export { MAX_DEPTH };
 
 type ArtistRow = {
     mbid: string;
@@ -22,10 +24,7 @@ type EdgeRow = {
     attributes: string | null;
 };
 
-type BfsRow = {
-    depth: number;
-    path_mbids: string;
-};
+type NeighborRow = { neighbor_mbid: string };
 
 type FrontmanRow = ArtistRow & { attributes: string | null };
 
@@ -33,7 +32,7 @@ export class SqliteRepo implements ArtistsRepo {
     private db: Database.Database;
     private searchStmt: Database.Statement;
     private frontmanStmt: Database.Statement;
-    private bfsStmt: Database.Statement;
+    private neighborsStmt: Database.Statement;
     private edgeStmt: Database.Statement;
 
     constructor(dbPath: string) {
@@ -59,33 +58,10 @@ export class SqliteRepo implements ArtistsRepo {
             LIMIT 1
         `);
 
-        this.bfsStmt = this.db.prepare(`
-            WITH RECURSIVE
-              neighbors(from_node, to_node) AS (
-                SELECT entity0_mbid, entity1_mbid FROM relations
-                UNION ALL
-                SELECT entity1_mbid, entity0_mbid FROM relations
-              ),
-              bfs(node, depth, path_mbids) AS (
-                SELECT a.mbid, 0, '|' || a.mbid || '|'
-                FROM artists a WHERE a.mbid = ?
-
-                UNION ALL
-
-                SELECT
-                  n.to_node,
-                  b.depth + 1,
-                  b.path_mbids || n.to_node || '|'
-                FROM bfs b
-                JOIN neighbors n ON n.from_node = b.node
-                WHERE b.depth < ${MAX_DEPTH}
-                  AND instr(b.path_mbids, '|' || n.to_node || '|') = 0
-              )
-            SELECT depth, path_mbids
-            FROM bfs
-            WHERE node = ?
-            ORDER BY depth
-            LIMIT 1
+        this.neighborsStmt = this.db.prepare(`
+            SELECT entity1_mbid AS neighbor_mbid FROM relations WHERE entity0_mbid = ?
+            UNION
+            SELECT entity0_mbid AS neighbor_mbid FROM relations WHERE entity1_mbid = ?
         `);
 
         this.edgeStmt = this.db.prepare(`
@@ -118,21 +94,31 @@ export class SqliteRepo implements ArtistsRepo {
     }
 
     async findPath(fromMbid: string, toMbid: string): Promise<PathResult | null> {
-        const bfsRow = this.bfsStmt.get(fromMbid, toMbid) as BfsRow | undefined;
+        const bfsResult = bidirectionalBfs({
+            fromMbid,
+            toMbid,
+            maxDepth: MAX_DEPTH,
+            neighborsOf: (mbid) => this.neighborsOf(mbid),
+        });
 
-        if (!bfsRow) {
+        if (bfsResult === null) {
             return null;
         }
 
-        const mbids = bfsRow.path_mbids.split('|').filter(Boolean);
-        const nodes = this.hydrateNodes(mbids);
-        const edges = this.hydrateEdges(mbids);
+        const nodes = this.hydrateNodes(bfsResult.path);
+        const edges = this.hydrateEdges(bfsResult.path);
 
         return {
-            depth: bfsRow.depth,
+            depth: bfsResult.depth,
             nodes,
             edges,
         };
+    }
+
+    private neighborsOf(mbid: string): string[] {
+        const rows = this.neighborsStmt.all(mbid, mbid) as NeighborRow[];
+
+        return rows.map((r) => r.neighbor_mbid);
     }
 
     private hydrateNodes(mbids: string[]): Artist[] {

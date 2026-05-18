@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { getRepo } from '@/lib/db';
 import { isValidMbid } from '@/lib/db/mbid';
-import { MAX_DEPTH } from '@/lib/db/sqlite-repo';
+import { MAX_DEPTH } from '@/lib/db/max-depth';
 
 export const runtime = 'nodejs';
 
