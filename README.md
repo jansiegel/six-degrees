@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <img src="public/readme-logo.png" alt="Six Degrees of Music" width="240" />
+</p>
 
-## Getting Started
+# Six Degrees of _______, music edition
 
-First, run the development server:
+Find the shortest connection between any two musicians through their collaborators. A musical take on the classic [Six Degrees of Kevin Bacon](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon): instead of co-starring in films, two artists are linked if they shared a band, played as a supporting musician, or worked together in any recorded collaboration.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## How to use it
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Fill the search inputs and pick an artist from the dropdown and hit **FIND THE CONNECTION**. The result shows the chain of musicians linking your two picks; each name in between played in or alongside the artists on either side of them. So a result like _Queens of the Stone Age → Josh Homme → Eagles of Death Metal_ tells you Josh Homme is the person who connects the two bands.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+If no path exists within ten hops, the page shows "no connection found". Click **CHECK ANOTHER** to start over with two new artists.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Where the data comes from
 
-## Learn More
+The graph is built from [MusicBrainz](https://musicbrainz.org) database mirror. Only artists who appear in at least one recorded collaboration (band membership, supporting musician, or known performance alias) are included — purely solo artists with no documented collaborators won't appear in search.
 
-To learn more about Next.js, take a look at the following resources:
+## Live
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[jansiegel.com/six-degrees](https://jansiegel.com/six-degrees)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Created by [Jan Siegel](https://jansiegel.com), based on the idea of the [Six Degrees of Kevin Bacon](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon). Data sourced from the [MusicBrainz database](https://musicbrainz.org).

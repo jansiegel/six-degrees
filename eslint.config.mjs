@@ -26,14 +26,10 @@ const eslintConfig = defineConfig([
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     '.next/**',
     'out/**',
     'build/**',
     'next-env.d.ts',
-    // TODO Task 16: dead code, to be deleted after Slice 3 wrap-up.
-    'src/lib/musicbrainz.ts',
-    'src/lib/types.ts',
   ]),
 ]);
 

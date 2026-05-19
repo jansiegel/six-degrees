@@ -62,8 +62,8 @@ next-env.d.ts
 # IDE / tool settings (per-dev)
 .claude/
 .vscode/
-.CLAUDE.md
-.AGENTS.md
+/CLAUDE.md
+/AGENTS.md
 
 # MusicBrainz dump files (kept locally in ~/mb-data, but guard against accidental commits)
 mbdump/
