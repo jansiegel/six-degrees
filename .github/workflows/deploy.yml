@@ -63,7 +63,7 @@ jobs:
           SOURCE: 'deploy-bundle/'
           TARGET: ${{ secrets.DEPLOY_PATH }}
           ARGS: '-avz --delete'
-          EXCLUDE: '/.env, /.env.local, /.env.production, /node_modules/, /backup/, /backups/, /.htaccess, /.well-known/, /ecosystem.config.js'
+          EXCLUDE: '/.env, /.env.local, /.env.production, /backup/, /backups/, /.htaccess, /.well-known/, /ecosystem.config.js'
           SCRIPT_AFTER: |
             cd ${{ secrets.DEPLOY_PATH }}
             PM2="/usr/local/bin/node /usr/home/jansiegel/.npm-global/lib/node_modules/pm2/bin/pm2"
