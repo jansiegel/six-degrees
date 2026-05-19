@@ -20,7 +20,7 @@ export const Footer = () => {
     return (
         <footer className={clsx(styles.footer, FOOTER_CLASSES)}>
             <ul className={clsx(LIST_CLASSES)}>
-                <li>Created by <a href="https://jansiegel.com" target="_blank">Jan Siegel</a>.</li>
+                <li>Created by <a href="https://jansiegel.com" target="_blank">Jan Siegel</a>, based on the idea of <a href="https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon" target="_blank" rel="noopener noreferrer">the Six Degrees of Kevin Bacon</a>.</li>
                 <li>Data sourced from the <a href="https://musicbrainz.org/doc/MusicBrainz_Database/" target="_blank" rel="noopener noreferrer">MusicBrainz</a> database.</li>
             </ul>
         </footer>

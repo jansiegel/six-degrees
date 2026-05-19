@@ -1,8 +1,10 @@
+type NeighborsOf = (mbid: string) => Promise<string[]>;
+
 type Args = {
     fromMbid: string;
     toMbid: string;
     maxDepth: number;
-    neighborsOf: (mbid: string) => string[];
+    neighborsOf: NeighborsOf;
 };
 
 type Result = {
@@ -10,7 +12,7 @@ type Result = {
     depth: number;
 };
 
-export function bidirectionalBfs({ fromMbid, toMbid, maxDepth, neighborsOf }: Args): Result | null {
+export async function bidirectionalBfs({ fromMbid, toMbid, maxDepth, neighborsOf }: Args): Promise<Result | null> {
     if (fromMbid === toMbid) {
         return { path: [fromMbid], depth: 0 };
     }
@@ -27,7 +29,7 @@ export function bidirectionalBfs({ fromMbid, toMbid, maxDepth, neighborsOf }: Ar
         const expandFromSide = frontierFrom.size <= frontierTo.size;
 
         if (expandFromSide) {
-            const result = expand(frontierFrom, parentFrom, parentTo, neighborsOf);
+            const result = await expand(frontierFrom, parentFrom, parentTo, neighborsOf);
 
             if (result.meetingNode !== null) {
                 return reconstruct(result.meetingNode, parentFrom, parentTo);
@@ -36,7 +38,7 @@ export function bidirectionalBfs({ fromMbid, toMbid, maxDepth, neighborsOf }: Ar
             frontierFrom = result.nextFrontier;
             depthFrom += 1;
         } else {
-            const result = expand(frontierTo, parentTo, parentFrom, neighborsOf);
+            const result = await expand(frontierTo, parentTo, parentFrom, neighborsOf);
 
             if (result.meetingNode !== null) {
                 return reconstruct(result.meetingNode, parentFrom, parentTo);
@@ -55,16 +57,18 @@ type ExpandResult = {
     meetingNode: string | null;
 };
 
-function expand(
+async function expand(
     frontier: Set<string>,
     parentSelf: Map<string, string | null>,
     parentOther: Map<string, string | null>,
-    neighborsOf: (mbid: string) => string[],
-): ExpandResult {
+    neighborsOf: NeighborsOf,
+): Promise<ExpandResult> {
     const nextFrontier = new Set<string>();
 
     for (const node of frontier) {
-        for (const neighbor of neighborsOf(node)) {
+        const neighbors = await neighborsOf(node);
+
+        for (const neighbor of neighbors) {
             if (parentSelf.has(neighbor)) {
                 continue;
             }

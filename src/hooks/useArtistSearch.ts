@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Artist } from '@/lib/db/types';
+import { apiUrl } from '@/lib/api-url';
 
 export function useArtistSearch(query: string, limit: number = 5) {
     return useQuery({
         queryKey: ['searchArtist', query, limit],
         queryFn: async () => {
             const res = await fetch(
-                `/api/artists?q=${encodeURIComponent(query)}&limit=${limit}`
+                apiUrl(`/api/artists?q=${encodeURIComponent(query)}&limit=${limit}`)
             );
 
             if (!res.ok) {

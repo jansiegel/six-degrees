@@ -1,12 +1,10 @@
 import 'server-only';
-import Database from 'better-sqlite3';
 import type { ArtistsRepo } from './repo';
 import { RELATION_TYPE } from './relations';
 import { bidirectionalBfs } from './bidirectional-bfs';
 import { MAX_DEPTH } from './max-depth';
 import type { Artist, Frontman, PathEdge, PathResult } from './types';
-
-export { MAX_DEPTH };
+import { D1Client, type D1ClientConfig } from './d1-client';
 
 type ArtistRow = {
     mbid: string;
@@ -28,60 +26,57 @@ type NeighborRow = { neighbor_mbid: string };
 
 type FrontmanRow = ArtistRow & { attributes: string | null };
 
-export class SqliteRepo implements ArtistsRepo {
-    private db: Database.Database;
-    private searchStmt: Database.Statement;
-    private frontmanStmt: Database.Statement;
-    private neighborsStmt: Database.Statement;
-    private edgeStmt: Database.Statement;
+const SEARCH_SQL = `
+    SELECT mbid, name, type, disambiguation
+    FROM artists
+    WHERE name LIKE ?1 || '%' ESCAPE '\\' COLLATE NOCASE
+       OR sort_name LIKE ?1 || '%' ESCAPE '\\' COLLATE NOCASE
+    ORDER BY length(name) ASC, name ASC
+    LIMIT ?2
+`;
 
-    constructor(dbPath: string) {
-        this.db = new Database(dbPath, { readonly: true, fileMustExist: true });
+const FRONTMAN_SQL = `
+    SELECT a.mbid, a.name, a.type, a.disambiguation, r.attributes
+    FROM relations r
+    JOIN artists a ON a.mbid = r.entity0_mbid
+    WHERE r.entity1_mbid = ?
+      AND r.relation_type = ${RELATION_TYPE.MEMBER}
+      AND r.is_lead_vocals = 1
+    ORDER BY (r.end_year IS NULL) DESC, r.begin_year DESC
+    LIMIT 1
+`;
 
-        this.searchStmt = this.db.prepare(`
-            SELECT mbid, name, type, disambiguation
-            FROM artists
-            WHERE name LIKE :q || '%' ESCAPE '\\' COLLATE NOCASE
-               OR sort_name LIKE :q || '%' ESCAPE '\\' COLLATE NOCASE
-            ORDER BY length(name) ASC, name ASC
-            LIMIT :limit
-        `);
+const NEIGHBORS_SQL = `
+    SELECT entity1_mbid AS neighbor_mbid FROM relations WHERE entity0_mbid = ?
+    UNION
+    SELECT entity0_mbid AS neighbor_mbid FROM relations WHERE entity1_mbid = ?
+`;
 
-        this.frontmanStmt = this.db.prepare(`
-            SELECT a.mbid, a.name, a.type, a.disambiguation, r.attributes
-            FROM relations r
-            JOIN artists a ON a.mbid = r.entity0_mbid
-            WHERE r.entity1_mbid = ?
-              AND r.relation_type = ${RELATION_TYPE.MEMBER}
-              AND r.is_lead_vocals = 1
-            ORDER BY (r.end_year IS NULL) DESC, r.begin_year DESC
-            LIMIT 1
-        `);
+const EDGE_SQL = `
+    SELECT link_id, entity0_mbid, entity1_mbid, relation_type, is_lead_vocals, attributes
+    FROM relations
+    WHERE (entity0_mbid = ?1 AND entity1_mbid = ?2)
+       OR (entity0_mbid = ?2 AND entity1_mbid = ?1)
+    LIMIT 1
+`;
 
-        this.neighborsStmt = this.db.prepare(`
-            SELECT entity1_mbid AS neighbor_mbid FROM relations WHERE entity0_mbid = ?
-            UNION
-            SELECT entity0_mbid AS neighbor_mbid FROM relations WHERE entity1_mbid = ?
-        `);
+export class D1Repo implements ArtistsRepo {
+    private readonly client: D1Client;
 
-        this.edgeStmt = this.db.prepare(`
-            SELECT link_id, entity0_mbid, entity1_mbid, relation_type, is_lead_vocals, attributes
-            FROM relations
-            WHERE (entity0_mbid = ? AND entity1_mbid = ?)
-               OR (entity0_mbid = ? AND entity1_mbid = ?)
-            LIMIT 1
-        `);
+    constructor(config: D1ClientConfig) {
+        this.client = new D1Client(config);
     }
 
     async searchByName(query: string, limit: number): Promise<Artist[]> {
         const escapedQuery = query.replace(/[\\%_]/g, (m) => `\\${m}`);
-        const rows = this.searchStmt.all({ q: escapedQuery, limit }) as ArtistRow[];
+        const rows = await this.client.query<ArtistRow>(SEARCH_SQL, [escapedQuery, limit]);
 
         return rows.map(rowToArtist);
     }
 
     async getFrontman(bandMbid: string): Promise<Frontman | null> {
-        const row = this.frontmanStmt.get(bandMbid) as FrontmanRow | undefined;
+        const rows = await this.client.query<FrontmanRow>(FRONTMAN_SQL, [bandMbid]);
+        const row = rows[0];
 
         if (!row) {
             return null;
@@ -105,8 +100,8 @@ export class SqliteRepo implements ArtistsRepo {
             return null;
         }
 
-        const nodes = this.hydrateNodes(bfsResult.path);
-        const edges = this.hydrateEdges(bfsResult.path);
+        const nodes = await this.hydrateNodes(bfsResult.path);
+        const edges = await this.hydrateEdges(bfsResult.path);
 
         return {
             depth: bfsResult.depth,
@@ -116,16 +111,17 @@ export class SqliteRepo implements ArtistsRepo {
     }
 
     private async neighborsOf(mbid: string): Promise<string[]> {
-        const rows = this.neighborsStmt.all(mbid, mbid) as NeighborRow[];
+        const rows = await this.client.query<NeighborRow>(NEIGHBORS_SQL, [mbid, mbid]);
 
         return rows.map((r) => r.neighbor_mbid);
     }
 
-    private hydrateNodes(mbids: string[]): Artist[] {
-        const placeholders = mbids.map(() => '?').join(', ');
-        const rows = this.db
-            .prepare(`SELECT mbid, name, type, disambiguation FROM artists WHERE mbid IN (${placeholders})`)
-            .all(...mbids) as ArtistRow[];
+    private async hydrateNodes(mbids: string[]): Promise<Artist[]> {
+        const placeholders = mbids.map((_, i) => `?${i + 1}`).join(', ');
+        const rows = await this.client.query<ArtistRow>(
+            `SELECT mbid, name, type, disambiguation FROM artists WHERE mbid IN (${placeholders})`,
+            mbids,
+        );
         const byMbid = new Map(rows.map((r) => [r.mbid, r]));
 
         return mbids.map((m) => {
@@ -138,17 +134,19 @@ export class SqliteRepo implements ArtistsRepo {
         });
     }
 
-    private hydrateEdges(mbids: string[]): PathEdge[] {
+    private async hydrateEdges(mbids: string[]): Promise<PathEdge[]> {
         const edges: PathEdge[] = [];
 
         for (let i = 0; i < mbids.length - 1; i++) {
             const a = mbids[i];
             const b = mbids[i + 1];
-            const row = this.edgeStmt.get(a, b, b, a) as EdgeRow | undefined;
+            const rows = await this.client.query<EdgeRow>(EDGE_SQL, [a, b]);
+            const row = rows[0];
 
             if (!row) {
                 throw new Error(`Hydrate missing edge: ${a} - ${b}`);
             }
+
             edges.push({
                 fromMbid: a,
                 toMbid: b,
@@ -158,6 +156,7 @@ export class SqliteRepo implements ArtistsRepo {
                 attributes: row.attributes ? row.attributes.split(',') : [],
             });
         }
+
         return edges;
     }
 }

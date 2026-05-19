@@ -24,6 +24,10 @@ node_modules
 /build
 
 # misc
+/docs
+/tmp
+/d1-chunks
+/scripts
 .DS_Store
 *.pem
 
