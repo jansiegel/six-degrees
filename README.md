@@ -22,4 +22,6 @@ The graph is built from [MusicBrainz](https://musicbrainz.org) database mirror. 
 
 ---
 
-Created by [Jan Siegel](https://jansiegel.com), based on the idea of the [Six Degrees of Kevin Bacon](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon). Data sourced from the [MusicBrainz database](https://musicbrainz.org).
+Created by [Jan Siegel](https://jansiegel.com), based on the idea of the [Six Degrees of Kevin Bacon](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon). 
+
+Data sourced from the [MusicBrainz database](https://musicbrainz.org).
