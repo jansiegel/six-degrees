@@ -8,7 +8,7 @@ Find the shortest connection between any two musicians through their collaborato
 
 ## How to use it
 
-Fill the search inputs and pick an artist from the dropdown and hit **FIND THE CONNECTION**. The result shows the chain of musicians linking your two picks; each name in between played in or alongside the artists on either side of them. So a result like _Queens of the Stone Age → Josh Homme → Eagles of Death Metal_ tells you Josh Homme is the person who connects the two bands.
+Fill the search inputs, pick an artist from the dropdown and hit **FIND THE CONNECTION**. The result shows the chain of musicians linking your two picks; each name in between played in or alongside the artists on either side of them. So a result like _Queens of the Stone Age → Josh Homme → Eagles of Death Metal_ tells you Josh Homme is the person who connects the two bands.
 
 If no path exists within ten hops, the page shows "no connection found". Click **CHECK ANOTHER** to start over with two new artists.
 
