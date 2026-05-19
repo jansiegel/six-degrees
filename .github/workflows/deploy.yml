@@ -66,5 +66,6 @@ jobs:
           EXCLUDE: '/.env, /.env.local, /.env.production, /node_modules/, /backup/, /backups/, /.htaccess, /.well-known/, /ecosystem.config.js'
           SCRIPT_AFTER: |
             cd ${{ secrets.DEPLOY_PATH }}
-            PORT=3001 HOSTNAME=127.0.0.1 $HOME/.npm-global/bin/pm2 reload six-degrees --update-env \
-              || PORT=3001 HOSTNAME=127.0.0.1 $HOME/.npm-global/bin/pm2 start server.js --name six-degrees --update-env
+            PM2="/usr/local/bin/node /usr/home/jansiegel/.npm-global/lib/node_modules/pm2/bin/pm2"
+            PORT=3001 HOSTNAME=127.0.0.1 $PM2 reload six-degrees --update-env \
+              || PORT=3001 HOSTNAME=127.0.0.1 $PM2 start server.js --name six-degrees --update-env
