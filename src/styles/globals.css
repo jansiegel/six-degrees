@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+:root {
+  color-scheme: light;
+}
+
 html,
 body {
   margin: 0;

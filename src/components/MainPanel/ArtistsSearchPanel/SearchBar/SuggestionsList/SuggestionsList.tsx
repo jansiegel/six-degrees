@@ -10,27 +10,34 @@ type Props = {
     direction: 'below' | 'above';
 };
 
-const LIST_CLASSES = [
-    'absolute',
-    'left-0',
-    'right-0',
-    'z-10',
-    'p-2',
-    'menu',
-    'rounded-none',
-    'bg-poster-light-bg',
-    'border-poster-shadow',
-    'border',
-    'shadow-[0.5em_0.5em_0_0_color-mix(in_srgb,var(--color-page-bg)_30%,transparent)]',
-];
-
-const DIRECTION_BELOW_CLASSES = ['top-full', 'mt-1'];
-const DIRECTION_ABOVE_CLASSES = ['bottom-full', 'mb-1'];
-
-const DISAMBIGUATION_CLASSES = [
-    'text-xs',
-    'opacity-60',
-];
+const CSS_CLASSES = {
+    list: [
+        'absolute',
+        'left-0',
+        'right-0',
+        'z-10',
+        'p-2',
+        'menu',
+        'rounded-none',
+        'bg-poster-light-bg',
+        'text-page-bg',
+        'border-poster-shadow',
+        'border',
+        'shadow-[0.5em_0.5em_0_0_color-mix(in_srgb,var(--color-page-bg)_30%,transparent)]',
+    ],
+    directionBelow: [
+        'top-full',
+        'mt-1',
+    ],
+    directionAbove: [
+        'bottom-full',
+        'mb-1',
+    ],
+    disambiguation: [
+        'text-xs',
+        'opacity-60',
+    ],
+};
 
 export const SuggestionsList = ({ suggestions, onSelect, onReturnFocus, onDismiss, direction }: Props) => {
     const ulRef = useRef<HTMLUListElement>(null);
@@ -87,19 +94,24 @@ export const SuggestionsList = ({ suggestions, onSelect, onReturnFocus, onDismis
     return (
         <ul
             ref={ulRef}
-            className={clsx(LIST_CLASSES, direction === 'below' ? DIRECTION_BELOW_CLASSES : DIRECTION_ABOVE_CLASSES)}
+            className={clsx(
+                CSS_CLASSES.list,
+                direction === 'below' ? CSS_CLASSES.directionBelow : CSS_CLASSES.directionAbove,
+            )}
         >
             {suggestions.map((artist, index) => (
                 <li key={artist.mbid}>
                     <button
-                        ref={(el) => { buttonRefs.current[index] = el; }}
+                        ref={(el) => {
+                            buttonRefs.current[index] = el;
+                        }}
                         type="button"
                         onClick={() => onSelect(artist)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
                     >
                         <span>{artist.name}</span>
                         {artist.disambiguation && (
-                            <span className={clsx(DISAMBIGUATION_CLASSES)}>{artist.disambiguation}</span>
+                            <span className={clsx(CSS_CLASSES.disambiguation)}>{artist.disambiguation}</span>
                         )}
                     </button>
                 </li>

@@ -17,41 +17,49 @@ type SearchBarProps = {
     suggestions?: Artist[];
 };
 
-const WRAPPER_CLASSES = [
-    'flex',
-    'flex-col',
-    'items-center',
-    'bg-poster-light-bg',
-    'w-full',
-    'md:w-1/2',
-];
+const CSS_CLASSES = {
+    wrapper: [
+        'flex',
+        'flex-col',
+        'items-center',
+        'bg-poster-light-bg',
+        'w-full',
+        'md:w-1/2',
+    ],
+    label: [
+        'text-base',
+        'font-bold',
+        'uppercase',
+        'font-(family-name:--font-dm-sans, sans-serif)',
+        'text-center',
+        'text-page-bg',
+        'mt-1',
+    ],
+    input: [
+        'input',
+        'w-full',
+        'focus-within:outline-0',
+        'bg-poster-light-bg',
+        'text-page-bg',
+        'rounded-none',
+    ],
+    inputWrapper: [
+        'relative',
+        'inline-block',
+        'w-11/12',
+        'my-3',
+    ],
+};
 
-const LABEL_CLASSES = [
-    'text-base',
-    'font-bold',
-    'uppercase',
-    'font-(family-name:--font-dm-sans, sans-serif)',
-    'text-center',
-    'text-page-bg',
-    'mt-1',
-];
-
-const INPUT_CLASSES = [
-    'input',
-    'w-full',
-    'focus-within:outline-0',
-    'bg-poster-light-bg',
-    'rounded-none',
-];
-
-const INPUT_WRAPPER_CLASSES = [
-    'relative',
-    'inline-block',
-    'w-11/12',
-    'my-3',
-];
-
-export const SearchBar = ({ label, placeholder, value, onChange, onSelect, className, suggestions }: SearchBarProps) => {
+export const SearchBar = ({
+    label,
+    placeholder,
+    value,
+    onChange,
+    onSelect,
+    className,
+    suggestions,
+}: SearchBarProps) => {
     const inputId = useId();
     const inputRef = useRef<HTMLInputElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -73,10 +81,7 @@ export const SearchBar = ({ label, placeholder, value, onChange, onSelect, class
     }, [hasResults]);
 
     const focusInput = () => inputRef.current?.focus();
-
-    const dismissDropdown = () => {
-        setIsDismissed(true);
-    };
+    const dismissDropdown = () => setIsDismissed(true);
 
     const selectArtist = (artist: Artist) => {
         setIsDismissed(true);
@@ -117,15 +122,19 @@ export const SearchBar = ({ label, placeholder, value, onChange, onSelect, class
     };
 
     return (
-        <div className={clsx(WRAPPER_CLASSES, className)}>
-            <div className="flex flex-col w-full">
-                {label && <label htmlFor={inputId} className={clsx(LABEL_CLASSES)}>{label}</label>}
+        <div className={clsx(CSS_CLASSES.wrapper, className)}>
+            <div className="flex w-full flex-col">
+                {label && (
+                    <label htmlFor={inputId} className={clsx(CSS_CLASSES.label)}>
+                        {label}
+                    </label>
+                )}
                 <div className="text-center">
-                    <div ref={wrapperRef} className={clsx(INPUT_WRAPPER_CLASSES)}>
+                    <div ref={wrapperRef} className={clsx(CSS_CLASSES.inputWrapper)}>
                         <input
                             ref={inputRef}
                             id={inputId}
-                            className={clsx(INPUT_CLASSES)}
+                            className={clsx(CSS_CLASSES.input)}
                             type="text"
                             name="artist-search"
                             value={value}

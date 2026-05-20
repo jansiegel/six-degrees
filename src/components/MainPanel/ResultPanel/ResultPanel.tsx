@@ -16,69 +16,62 @@ type ResultPanelProps = {
     className?: string;
 };
 
-const BLOCK_CLASSES = [
-    'text-center',
-    'p-1',
-    'w-full',
-    'text-page-bg',
-];
-
-const BOOKEND_CLASSES = [
-    ...BLOCK_CLASSES,
-    'bg-poster-bg-orange',
-    'text-poster-font',
-    'font-(family-name:--font-young-serif,serif)',
-    'leading-tight',
-];
-
-const ENTRY_CLASSES = [
-    ...BLOCK_CLASSES,
-    'bg-poster-light-bg',
-    'px-1',
-];
-
-const BOOKEND_HEADING_CLASSES = [
-    'uppercase',
-];
-
-const ENTRY_HEADING_CLASSES = [
-    'text-3xl',
-    'font-extrabold',
-    'py-3',
-    'uppercase',
-];
-
-const BAND_ROLE_ITEM_CLASSES = [
-    'flex-1',
-    'text-center',
-    'border',
-    'border-solid',
-    'border-page-bg/30',
-    'p-1',
-    'leading-tight',
-    'transition-colors',
-];
-
-const BAND_ROLES_LIST_CLASSES = [
-    'flex',
-    'flex-row',
-    'gap-1',
-];
-
-const CHEVRON_CLASSES = [
-    'h-6',
-    'w-6',
-    'text-poster-light-bg',
-];
-
-const PANEL_TEXT_CLASSES = [
-    'font-(family-name:--font-dm-sans,sans-serif)',
-];
-
-const RESET_WRAPPER_CLASSES = [
-    'mt-12',
-    'w-1/2',
-];
+const CSS_CLASSES = {
+    bookend: [
+        'text-center',
+        'p-1',
+        'w-full',
+        'text-page-bg',
+        'bg-poster-bg-orange',
+        'text-poster-font',
+        'font-(family-name:--font-young-serif,serif)',
+        'leading-tight',
+    ],
+    entry: [
+        'text-center',
+        'p-1',
+        'w-full',
+        'text-page-bg',
+        'bg-poster-light-bg',
+        'px-1',
+    ],
+    bookendHeading: [
+        'uppercase',
+    ],
+    entryHeading: [
+        'text-3xl',
+        'font-extrabold',
+        'py-3',
+        'uppercase',
+    ],
+    bandRoleItem: [
+        'flex-1',
+        'text-center',
+        'border',
+        'border-solid',
+        'border-page-bg/30',
+        'p-1',
+        'leading-tight',
+        'transition-colors',
+    ],
+    bandRolesList: [
+        'flex',
+        'flex-row',
+        'gap-1',
+    ],
+    chevron: [
+        'h-6',
+        'w-6',
+        'text-poster-light-bg',
+    ],
+    panelText: [
+        'font-(family-name:--font-dm-sans,sans-serif)',
+    ],
+    resetWrapper: [
+        'mt-12',
+        'w-1/2',
+    ],
+};
 
 type BandRoleItemProps = {
     bandRole: BandRole;
@@ -90,7 +83,7 @@ const BandRoleItem = ({ bandRole, isHovered, onHover }: BandRoleItemProps) => (
     <li
         onMouseEnter={() => onHover(bandRole.name)}
         onMouseLeave={() => onHover(null)}
-        className={clsx(BAND_ROLE_ITEM_CLASSES, isHovered && 'bg-poster-bg-orange/10')}
+        className={clsx(CSS_CLASSES.bandRoleItem, isHovered && 'bg-poster-bg-orange/10')}
     >
         <strong>{bandRole.name}</strong>
         {bandRole.role.length > 0 && (
@@ -105,28 +98,27 @@ export const ResultPanel = ({ outcome, onReset, className }: ResultPanelProps) =
     const { path, displayNames, frontmen } = outcome;
     const [hoveredArtistName, setHoveredArtistName] = useState<string | null>(null);
 
-    const entries = useMemo(
-        () => path !== null ? buildPathEntries(path, frontmen) : [],
-        [path, frontmen],
-    );
+    const entries = useMemo(() => (path !== null ? buildPathEntries(path, frontmen) : []), [path, frontmen]);
 
     return (
-        <div className={clsx(className, PANEL_TEXT_CLASSES)}>
-            <div className={clsx(BOOKEND_CLASSES)}>
-                <h1 className={clsx(styles.bookend, BOOKEND_HEADING_CLASSES)}>
-                    the six degrees of<br />{displayNames[0]}
+        <div className={clsx(className, CSS_CLASSES.panelText)}>
+            <div className={clsx(CSS_CLASSES.bookend)}>
+                <h1 className={clsx(styles.bookend, CSS_CLASSES.bookendHeading)}>
+                    the six degrees of
+                    <br />
+                    {displayNames[0]}
                 </h1>
             </div>
             {path === null ? (
-                <div className={clsx(ENTRY_CLASSES)}>
-                    <h2 className={clsx(ENTRY_HEADING_CLASSES)}>No connection found within {MAX_DEPTH} hops.</h2>
+                <div className={clsx(CSS_CLASSES.entry)}>
+                    <h2 className={clsx(CSS_CLASSES.entryHeading)}>No connection found within {MAX_DEPTH} hops.</h2>
                 </div>
             ) : (
                 entries.map((entry, index) => (
                     <Fragment key={entry.mbid}>
-                        <div className={clsx(ENTRY_CLASSES)}>
-                            <h2 className={clsx(ENTRY_HEADING_CLASSES)}>{entry.name}</h2>
-                            <ul className={clsx(BAND_ROLES_LIST_CLASSES)}>
+                        <div className={clsx(CSS_CLASSES.entry)}>
+                            <h2 className={clsx(CSS_CLASSES.entryHeading)}>{entry.name}</h2>
+                            <ul className={clsx(CSS_CLASSES.bandRolesList)}>
                                 {entry.from && (
                                     <BandRoleItem
                                         bandRole={entry.from}
@@ -143,18 +135,18 @@ export const ResultPanel = ({ outcome, onReset, className }: ResultPanelProps) =
                                 )}
                             </ul>
                         </div>
-                        {index < entries.length - 1 && (
-                            <ChevronDoubleDownIcon className={clsx(CHEVRON_CLASSES)} />
-                        )}
+                        {index < entries.length - 1 && <ChevronDoubleDownIcon className={clsx(CSS_CLASSES.chevron)} />}
                     </Fragment>
                 ))
             )}
-            <div className={clsx(BOOKEND_CLASSES)}>
-                <h1 className={clsx(styles.bookend, BOOKEND_HEADING_CLASSES)}>
-                    the six degrees of<br />{displayNames[1]}
+            <div className={clsx(CSS_CLASSES.bookend)}>
+                <h1 className={clsx(styles.bookend, CSS_CLASSES.bookendHeading)}>
+                    the six degrees of
+                    <br />
+                    {displayNames[1]}
                 </h1>
             </div>
-            <div className={clsx(RESET_WRAPPER_CLASSES)}>
+            <div className={clsx(CSS_CLASSES.resetWrapper)}>
                 <Button type="button" onClick={onReset}>
                     Check another
                 </Button>

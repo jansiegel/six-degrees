@@ -4,47 +4,46 @@ import clsx from 'clsx';
 import '../styles/globals.css';
 import { Providers } from './providers';
 
-const HTML_CLASSES = [
-    'h-full',
-    'antialiased',
-    'bg-page-bg',
-];
-
-const BODY_CLASSES = [
-    'min-h-full',
-    'flex',
-    'flex-col',
-];
+const CSS_CLASSES = {
+    html: [
+        'h-full',
+        'antialiased',
+        'bg-page-bg',
+    ],
+    body: [
+        'min-h-full',
+        'flex',
+        'flex-col',
+    ],
+};
 
 const youngSerif = Young_Serif({
-  subsets: ['latin'],
-  variable: '--font-young-serif',
-  weight: ['400'],
+    subsets: ['latin'],
+    variable: '--font-young-serif',
+    weight: ['400'],
 });
 
 const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
+    subsets: ['latin'],
+    variable: '--font-dm-sans',
 });
 
 export const metadata: Metadata = {
-  title: 'Six Degrees Of... (Music Connections)',
-  description: 'Six Degrees of Kevin Bacon in a music setting. Find the shortest connection between any two artists via their collaborators.',
+    title: 'Six Degrees Of... (Music Connections)',
+    description:
+        'Six Degrees of Kevin Bacon in a music setting. Find the shortest connection between any two artists via their collaborators.',
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="en"
-      className={clsx(youngSerif.variable, dmSans.variable, HTML_CLASSES)}
-    >
-      <body className={clsx(BODY_CLASSES)}>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en" className={clsx(youngSerif.variable, dmSans.variable, CSS_CLASSES.html)}>
+            <body className={clsx(CSS_CLASSES.body)}>
+                <Providers>{children}</Providers>
+            </body>
+        </html>
+    );
 }

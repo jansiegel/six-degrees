@@ -13,31 +13,31 @@ import { Poster } from './Poster/Poster';
 import { InteractiveLabel } from './InteractiveLabel/InteractiveLabel';
 import { Button } from '@/components/Button/Button';
 
-const SEARCH_BAR_ROW_CLASSES = [
-    'flex',
-    'flex-col',
-    'md:flex-row',
-    'w-full',
-    'gap-1',
-    'md:gap-1',
-];
-
-const SUBMIT_WRAPPER_CLASSES = [
-    'flex-1',
-    'flex',
-    'items-center',
-    'justify-center',
-    'w-full',
-];
-
-const SPINNER_CLASSES = [
-    'h-5',
-    'w-5',
-    'mr-2',
-    'align-middle',
-    'inline',
-    'animate-spin',
-];
+const CSS_CLASSES = {
+    searchBarRow: [
+        'flex',
+        'flex-col',
+        'md:flex-row',
+        'w-full',
+        'gap-1',
+        'md:gap-1',
+    ],
+    submitWrapper: [
+        'flex-1',
+        'flex',
+        'items-center',
+        'justify-center',
+        'w-full',
+    ],
+    spinner: [
+        'h-5',
+        'w-5',
+        'mr-2',
+        'align-middle',
+        'inline',
+        'animate-spin',
+    ],
+};
 
 type Props = {
     onResult: (
@@ -73,12 +73,10 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
     const firstSearchResults = useArtistSearch(useDebounce(first.input, 500));
     const secondSearchResults = useArtistSearch(useDebounce(second.input, 500));
 
-    const firstArtist = first.input === ''
-        ? PLACEHOLDER_ARTISTS[0]
-        : first.selected ?? firstSearchResults.data?.[0] ?? null;
-    const secondArtist = second.input === ''
-        ? PLACEHOLDER_ARTISTS[1]
-        : second.selected ?? secondSearchResults.data?.[0] ?? null;
+    const firstArtist =
+        first.input === '' ? PLACEHOLDER_ARTISTS[0] : (first.selected ?? firstSearchResults.data?.[0] ?? null);
+    const secondArtist =
+        second.input === '' ? PLACEHOLDER_ARTISTS[1] : (second.selected ?? secondSearchResults.data?.[0] ?? null);
 
     const firstFrontmanSearchResult = useFrontman(firstArtist?.mbid ?? null);
     const secondFrontmanSearchResult = useFrontman(secondArtist?.mbid ?? null);
@@ -96,9 +94,7 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
     );
 
     const activeFrontmanSearchResult =
-        lastTouched === 0 ? firstFrontmanSearchResult
-        : lastTouched === 1 ? secondFrontmanSearchResult
-        : null;
+        lastTouched === 0 ? firstFrontmanSearchResult : lastTouched === 1 ? secondFrontmanSearchResult : null;
     const activeArtist = lastTouched === 0 ? firstArtist : lastTouched === 1 ? secondArtist : null;
     const posterName = activeFrontmanSearchResult?.isSuccess
         ? (activeFrontmanSearchResult.data?.artist.name ?? activeArtist?.name)
@@ -106,12 +102,8 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
 
     const pathSearch = useFindPath();
 
-    const handleFirstChange = (v: string) => {
-        setFirst({ input: v, selected: null });
-    };
-    const handleSecondChange = (v: string) => {
-        setSecond({ input: v, selected: null });
-    };
+    const handleFirstChange = (v: string) => setFirst({ input: v, selected: null });
+    const handleSecondChange = (v: string) => setSecond({ input: v, selected: null });
     const handleFirstSelect = (a: Artist) => {
         setFirst({ input: a.name, selected: a });
         setLastTouched(0);
@@ -148,7 +140,7 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
             <Poster>
                 <InteractiveLabel injectedName={posterName} />
             </Poster>
-            <div className={clsx(SEARCH_BAR_ROW_CLASSES)}>
+            <div className={clsx(CSS_CLASSES.searchBarRow)}>
                 <SearchBar
                     label="First artist:"
                     value={first.input}
@@ -166,9 +158,9 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
                     suggestions={secondSearchResults.data}
                 />
             </div>
-            <div className={clsx(SUBMIT_WRAPPER_CLASSES)}>
+            <div className={clsx(CSS_CLASSES.submitWrapper)}>
                 <Button type="submit" disabled={!firstArtist || !secondArtist || pathSearch.isPending}>
-                    {pathSearch.isPending && <ArrowPathIcon className={clsx(SPINNER_CLASSES)} />}
+                    {pathSearch.isPending && <ArrowPathIcon className={clsx(CSS_CLASSES.spinner)} />}
                     {pathSearch.isPending ? 'Searching…' : 'Find the connection'}
                 </Button>
             </div>

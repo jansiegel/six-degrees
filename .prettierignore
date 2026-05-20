@@ -1,0 +1,13 @@
+node_modules
+.next
+dist
+out
+coverage
+pnpm-lock.yaml
+*.md
+db/
+scripts/
+tmp/
+docs/
+test-results/
+playwright-report/

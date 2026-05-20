@@ -12,42 +12,38 @@ export type Outcome = {
     frontmen: [Frontman | null, Frontman | null];
 };
 
-const PANEL_LAYOUT_BASE_CLASSES = [
-    'flex',
-    'flex-col',
-    'items-center',
-    'w-full',
-    'md:w-4/5',
-    'gap-1',
-];
-
-const PANEL_LAYOUT_SEARCH_CLASSES = [
-    ...PANEL_LAYOUT_BASE_CLASSES,
-    'min-h-[calc(100dvh-3.5rem)]',
-];
-
-const PANEL_LAYOUT_RESULT_CLASSES = PANEL_LAYOUT_BASE_CLASSES;
+const CSS_CLASSES = {
+    panelLayoutSearch: [
+        'flex',
+        'flex-col',
+        'items-center',
+        'w-full',
+        'md:w-4/5',
+        'gap-1',
+        'min-h-[calc(100dvh-3.5rem)]',
+    ],
+    panelLayoutResult: [
+        'flex',
+        'flex-col',
+        'items-center',
+        'w-full',
+        'md:w-4/5',
+        'gap-1',
+    ],
+};
 
 export const MainPanel = () => {
     const [outcome, setOutcome] = useState<Outcome | null>(null);
     const deferredOutcome = useDeferredValue(outcome);
+    const isFirstRender = useRef(true);
 
     const handleResult = useCallback(
-        (
-            path: PathResult | null,
-            displayNames: [string, string],
-            frontmen: [Frontman | null, Frontman | null],
-        ) => {
+        (path: PathResult | null, displayNames: [string, string], frontmen: [Frontman | null, Frontman | null]) => {
             setOutcome({ path, displayNames, frontmen });
         },
         [],
     );
-
-    const handleReset = useCallback(() => {
-        setOutcome(null);
-    }, []);
-
-    const isFirstRender = useRef(true);
+    const handleReset = useCallback(() => setOutcome(null), []);
 
     useEffect(() => {
         if (isFirstRender.current) {
@@ -63,14 +59,18 @@ export const MainPanel = () => {
     if (deferredOutcome !== null) {
         return (
             <ViewTransition>
-                <ResultPanel outcome={deferredOutcome} onReset={handleReset} className={clsx(PANEL_LAYOUT_RESULT_CLASSES)} />
+                <ResultPanel
+                    outcome={deferredOutcome}
+                    onReset={handleReset}
+                    className={clsx(CSS_CLASSES.panelLayoutResult)}
+                />
             </ViewTransition>
         );
     }
 
     return (
         <ViewTransition>
-            <ArtistsSearchPanel onResult={handleResult} className={clsx(PANEL_LAYOUT_SEARCH_CLASSES)} />
+            <ArtistsSearchPanel onResult={handleResult} className={clsx(CSS_CLASSES.panelLayoutSearch)} />
         </ViewTransition>
     );
 };
