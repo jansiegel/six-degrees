@@ -1,5 +1,3 @@
-import Script from 'next/script';
-
 const UMAMI_SRC = 'https://cloud.umami.is/script.js';
 
 export function Analytics() {
@@ -11,11 +9,10 @@ export function Analytics() {
     }
 
     return (
-        <Script
-            src={UMAMI_SRC}
-            strategy="afterInteractive"
-            data-website-id={websiteId}
+        <script
             defer
+            src={UMAMI_SRC}
+            data-website-id={websiteId}
         />
     );
 }
