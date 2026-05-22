@@ -69,7 +69,9 @@ jobs:
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
             PM2="/usr/local/bin/node $HOME/.npm-global/lib/node_modules/pm2/bin/pm2"
-            echo "Restarting pm2 process..."
-            PORT=53013 HOSTNAME=127.0.0.1 $PM2 restart six-degrees --update-env || PORT=53013 HOSTNAME=127.0.0.1 $PM2 start server.js --name six-degrees --update-env
+            echo "Recreating pm2 process to ensure cwd matches the deploy path..."
+            $PM2 delete six-degrees || true
+            PORT=53013 HOSTNAME=127.0.0.1 $PM2 start server.js --name six-degrees --update-env
+            $PM2 save
             echo "pm2 status:"
             $PM2 list
