@@ -12,6 +12,7 @@ import type { Artist, Frontman, PathResult } from '@/lib/db/types';
 import { Poster } from './Poster/Poster';
 import { InteractiveLabel } from './InteractiveLabel/InteractiveLabel';
 import { Button } from '@/components/Button/Button';
+import { trackEvent } from '@/lib/analytics/umami';
 
 const CSS_CLASSES = {
     searchBarRow: [
@@ -124,6 +125,16 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
         if (!second.selected) {
             handleSecondSelect(secondArtist);
         }
+
+        trackEvent({
+            name: 'search_submitted',
+            data: {
+                artist_a_name: firstArtist.name,
+                artist_a_mbid: firstArtist.mbid,
+                artist_b_name: secondArtist.name,
+                artist_b_mbid: secondArtist.mbid,
+            },
+        });
 
         pathSearch.mutate(
             { from: firstArtist.mbid, to: secondArtist.mbid },

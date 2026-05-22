@@ -44,6 +44,7 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_BASE_PATH: /six-degrees
+          NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
 
       - name: Assemble standalone bundle
         run: |

@@ -3,6 +3,7 @@ import { DM_Sans, Young_Serif } from 'next/font/google';
 import clsx from 'clsx';
 import '../styles/globals.css';
 import { Providers } from './providers';
+import { Analytics } from '@/components/Analytics/Analytics';
 
 const CSS_CLASSES = {
     html: [
@@ -42,6 +43,7 @@ export default function RootLayout({
     return (
         <html lang="en" className={clsx(youngSerif.variable, dmSans.variable, CSS_CLASSES.html)}>
             <body className={clsx(CSS_CLASSES.body)}>
+                <Analytics />
                 <Providers>{children}</Providers>
             </body>
         </html>
