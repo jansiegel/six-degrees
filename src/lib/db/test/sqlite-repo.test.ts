@@ -57,30 +57,29 @@ describe('SqliteRepo.searchByName', () => {
         expect(results[0].name).toBe('Queens of the Stone Age');
     });
 
-    it('matches via sort_name', async () => {
+    it('does not match on sort_name', async () => {
         const results = await repo.searchByName('homme', 10);
 
-        expect(results[0].name).toBe('Josh Homme');
+        expect(results).toEqual([]);
+    });
+
+    it('treats user-typed wildcards as no-ops rather than patterns', async () => {
+        const results = await repo.searchByName('%', 10);
+
+        expect(results).toEqual([]);
+    });
+
+    it('strips wildcards but keeps searching on what is left', async () => {
+        const results = await repo.searchByName('que%ens', 10);
+
+        expect(results).toHaveLength(1);
+        expect(results[0].name).toBe('Queens of the Stone Age');
     });
 
     it('respects the limit', async () => {
         const results = await repo.searchByName('e', 1);
 
         expect(results).toHaveLength(1);
-    });
-});
-
-describe('SqliteRepo.getFrontman', () => {
-    it('returns the lead-vocals member of a band', async () => {
-        const result = await repo.getFrontman('b-qotsa');
-
-        expect(result?.artist.name).toBe('Josh Homme');
-    });
-
-    it('returns null when no lead vocalist exists', async () => {
-        const result = await repo.getFrontman('b-bowie');
-
-        expect(result).toBeNull();
     });
 });
 

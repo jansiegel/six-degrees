@@ -1,10 +1,10 @@
 import 'server-only';
 import Database from 'better-sqlite3';
 import type { ArtistsRepo } from './repo';
-import { RELATION_TYPE } from './relations';
 import { bidirectionalBfs } from './bidirectional-bfs';
 import { MAX_DEPTH } from './max-depth';
-import type { Artist, Frontman, PathEdge, PathResult } from './types';
+import { buildPrefixPattern } from './search-pattern';
+import type { Artist, PathEdge, PathResult } from './types';
 
 export { MAX_DEPTH };
 
@@ -26,12 +26,9 @@ type EdgeRow = {
 
 type NeighborRow = { neighbor_mbid: string };
 
-type FrontmanRow = ArtistRow & { attributes: string | null };
-
 export class SqliteRepo implements ArtistsRepo {
     private db: Database.Database;
     private searchStmt: Database.Statement;
-    private frontmanStmt: Database.Statement;
     private neighborsStmt: Database.Statement;
     private edgeStmt: Database.Statement;
 
@@ -41,21 +38,9 @@ export class SqliteRepo implements ArtistsRepo {
         this.searchStmt = this.db.prepare(`
             SELECT mbid, name, type, disambiguation
             FROM artists
-            WHERE name LIKE :q || '%' ESCAPE '\\' COLLATE NOCASE
-               OR sort_name LIKE :q || '%' ESCAPE '\\' COLLATE NOCASE
+            WHERE name LIKE :pattern COLLATE NOCASE
             ORDER BY length(name) ASC, name ASC
             LIMIT :limit
-        `);
-
-        this.frontmanStmt = this.db.prepare(`
-            SELECT a.mbid, a.name, a.type, a.disambiguation, r.attributes
-            FROM relations r
-            JOIN artists a ON a.mbid = r.entity0_mbid
-            WHERE r.entity1_mbid = ?
-              AND r.relation_type = ${RELATION_TYPE.MEMBER}
-              AND r.is_lead_vocals = 1
-            ORDER BY (r.end_year IS NULL) DESC, r.begin_year DESC
-            LIMIT 1
         `);
 
         this.neighborsStmt = this.db.prepare(`
@@ -74,23 +59,15 @@ export class SqliteRepo implements ArtistsRepo {
     }
 
     async searchByName(query: string, limit: number): Promise<Artist[]> {
-        const escapedQuery = query.replace(/[\\%_]/g, (m) => `\\${m}`);
-        const rows = this.searchStmt.all({ q: escapedQuery, limit }) as ArtistRow[];
+        const pattern = buildPrefixPattern(query);
 
-        return rows.map(rowToArtist);
-    }
-
-    async getFrontman(bandMbid: string): Promise<Frontman | null> {
-        const row = this.frontmanStmt.get(bandMbid) as FrontmanRow | undefined;
-
-        if (!row) {
-            return null;
+        if (pattern === null) {
+            return [];
         }
 
-        return {
-            artist: rowToArtist(row),
-            attributes: row.attributes ? row.attributes.split(',') : [],
-        };
+        const rows = this.searchStmt.all({ pattern, limit }) as ArtistRow[];
+
+        return rows.map(rowToArtist);
     }
 
     async findPath(fromMbid: string, toMbid: string): Promise<PathResult | null> {

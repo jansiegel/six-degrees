@@ -19,8 +19,3 @@ export type PathResult = {
     nodes: Artist[];
     edges: PathEdge[];
 };
-
-export type Frontman = {
-    artist: Artist;
-    attributes: string[];
-};

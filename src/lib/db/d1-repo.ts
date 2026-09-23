@@ -1,9 +1,9 @@
 import 'server-only';
 import type { ArtistsRepo } from './repo';
-import { RELATION_TYPE } from './relations';
 import { bidirectionalBfs } from './bidirectional-bfs';
 import { MAX_DEPTH } from './max-depth';
-import type { Artist, Frontman, PathEdge, PathResult } from './types';
+import { buildPrefixPattern } from './search-pattern';
+import type { Artist, PathEdge, PathResult } from './types';
 import { D1Client, type D1ClientConfig } from './d1-client';
 
 type ArtistRow = {
@@ -24,26 +24,12 @@ type EdgeRow = {
 
 type NeighborRow = { neighbor_mbid: string };
 
-type FrontmanRow = ArtistRow & { attributes: string | null };
-
 const SEARCH_SQL = `
     SELECT mbid, name, type, disambiguation
     FROM artists
-    WHERE name LIKE ?1 || '%' ESCAPE '\\' COLLATE NOCASE
-       OR sort_name LIKE ?1 || '%' ESCAPE '\\' COLLATE NOCASE
+    WHERE name LIKE ?1 COLLATE NOCASE
     ORDER BY length(name) ASC, name ASC
     LIMIT ?2
-`;
-
-const FRONTMAN_SQL = `
-    SELECT a.mbid, a.name, a.type, a.disambiguation, r.attributes
-    FROM relations r
-    JOIN artists a ON a.mbid = r.entity0_mbid
-    WHERE r.entity1_mbid = ?
-      AND r.relation_type = ${RELATION_TYPE.MEMBER}
-      AND r.is_lead_vocals = 1
-    ORDER BY (r.end_year IS NULL) DESC, r.begin_year DESC
-    LIMIT 1
 `;
 
 const NEIGHBORS_SQL = `
@@ -68,24 +54,15 @@ export class D1Repo implements ArtistsRepo {
     }
 
     async searchByName(query: string, limit: number): Promise<Artist[]> {
-        const escapedQuery = query.replace(/[\\%_]/g, (m) => `\\${m}`);
-        const rows = await this.client.query<ArtistRow>(SEARCH_SQL, [escapedQuery, limit]);
+        const pattern = buildPrefixPattern(query);
 
-        return rows.map(rowToArtist);
-    }
-
-    async getFrontman(bandMbid: string): Promise<Frontman | null> {
-        const rows = await this.client.query<FrontmanRow>(FRONTMAN_SQL, [bandMbid]);
-        const row = rows[0];
-
-        if (!row) {
-            return null;
+        if (pattern === null) {
+            return [];
         }
 
-        return {
-            artist: rowToArtist(row),
-            attributes: row.attributes ? row.attributes.split(',') : [],
-        };
+        const rows = await this.client.query<ArtistRow>(SEARCH_SQL, [pattern, limit]);
+
+        return rows.map(rowToArtist);
     }
 
     async findPath(fromMbid: string, toMbid: string): Promise<PathResult | null> {

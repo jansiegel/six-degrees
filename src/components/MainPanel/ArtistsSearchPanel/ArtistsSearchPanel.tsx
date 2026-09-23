@@ -5,10 +5,9 @@ import { ArrowPathIcon } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
 import { SearchBar } from './SearchBar/SearchBar';
 import { useArtistSearch } from '@/hooks/useArtistSearch';
-import { useFrontman } from '@/hooks/useFrontman';
 import { useFindPath } from '@/hooks/useFindPath';
 import { useDebounce } from '@/hooks/useDebounce';
-import type { Artist, Frontman, PathResult } from '@/lib/db/types';
+import type { Artist, PathResult } from '@/lib/db/types';
 import { Poster } from './Poster/Poster';
 import { InteractiveLabel } from './InteractiveLabel/InteractiveLabel';
 import { Button } from '@/components/Button/Button';
@@ -41,11 +40,7 @@ const CSS_CLASSES = {
 };
 
 type Props = {
-    onResult: (
-        path: PathResult | null,
-        displayNames: [string, string],
-        frontmen: [Frontman | null, Frontman | null],
-    ) => void;
+    onResult: (path: PathResult | null, displayNames: [string, string]) => void;
     className?: string;
 };
 
@@ -79,27 +74,15 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
     const secondArtist =
         second.input === '' ? PLACEHOLDER_ARTISTS[1] : (second.selected ?? secondSearchResults.data?.[0] ?? null);
 
-    const firstFrontmanSearchResult = useFrontman(firstArtist?.mbid ?? null);
-    const secondFrontmanSearchResult = useFrontman(secondArtist?.mbid ?? null);
-
-    const firstDisplayName = firstFrontmanSearchResult.data?.artist.name ?? firstArtist?.name ?? first.input;
-    const secondDisplayName = secondFrontmanSearchResult.data?.artist.name ?? secondArtist?.name ?? second.input;
+    const firstDisplayName = firstArtist?.name ?? first.input;
+    const secondDisplayName = secondArtist?.name ?? second.input;
     const displayNames = useMemo<[string, string]>(
         () => [firstDisplayName, secondDisplayName],
         [firstDisplayName, secondDisplayName],
     );
 
-    const frontmen = useMemo<[Frontman | null, Frontman | null]>(
-        () => [firstFrontmanSearchResult.data ?? null, secondFrontmanSearchResult.data ?? null],
-        [firstFrontmanSearchResult.data, secondFrontmanSearchResult.data],
-    );
-
-    const activeFrontmanSearchResult =
-        lastTouched === 0 ? firstFrontmanSearchResult : lastTouched === 1 ? secondFrontmanSearchResult : null;
     const activeArtist = lastTouched === 0 ? firstArtist : lastTouched === 1 ? secondArtist : null;
-    const posterName = activeFrontmanSearchResult?.isSuccess
-        ? (activeFrontmanSearchResult.data?.artist.name ?? activeArtist?.name)
-        : undefined;
+    const posterName = activeArtist?.name;
 
     const pathSearch = useFindPath();
 
@@ -140,7 +123,7 @@ export const ArtistsSearchPanel = ({ onResult, className }: Props) => {
             { from: firstArtist.mbid, to: secondArtist.mbid },
             {
                 onSuccess: (data) => {
-                    onResult(data, displayNames, frontmen);
+                    onResult(data, displayNames);
                 },
             },
         );

@@ -95,10 +95,10 @@ const BandRoleItem = ({ bandRole, isHovered, onHover }: BandRoleItemProps) => (
 );
 
 export const ResultPanel = ({ outcome, onReset, className }: ResultPanelProps) => {
-    const { path, displayNames, frontmen } = outcome;
+    const { path, displayNames } = outcome;
     const [hoveredArtistName, setHoveredArtistName] = useState<string | null>(null);
 
-    const entries = useMemo(() => (path !== null ? buildPathEntries(path, frontmen) : []), [path, frontmen]);
+    const entries = useMemo(() => (path !== null ? buildPathEntries(path) : []), [path]);
 
     return (
         <div className={clsx(className, CSS_CLASSES.panelText)}>

@@ -4,12 +4,11 @@ import { useState, useDeferredValue, useCallback, useEffect, useRef, ViewTransit
 import clsx from 'clsx';
 import { ArtistsSearchPanel } from './ArtistsSearchPanel/ArtistsSearchPanel';
 import { ResultPanel } from './ResultPanel/ResultPanel';
-import type { Frontman, PathResult } from '@/lib/db/types';
+import type { PathResult } from '@/lib/db/types';
 
 export type Outcome = {
     path: PathResult | null;
     displayNames: [string, string];
-    frontmen: [Frontman | null, Frontman | null];
 };
 
 const CSS_CLASSES = {
@@ -37,12 +36,9 @@ export const MainPanel = () => {
     const deferredOutcome = useDeferredValue(outcome);
     const isFirstRender = useRef(true);
 
-    const handleResult = useCallback(
-        (path: PathResult | null, displayNames: [string, string], frontmen: [Frontman | null, Frontman | null]) => {
-            setOutcome({ path, displayNames, frontmen });
-        },
-        [],
-    );
+    const handleResult = useCallback((path: PathResult | null, displayNames: [string, string]) => {
+        setOutcome({ path, displayNames });
+    }, []);
     const handleReset = useCallback(() => setOutcome(null), []);
 
     useEffect(() => {

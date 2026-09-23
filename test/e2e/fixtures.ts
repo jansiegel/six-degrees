@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import type { Artist, Frontman, PathResult } from '@/lib/db/types';
+import type { Artist, PathResult } from '@/lib/db/types';
 
 const QOTSA: Artist = {
     mbid: '7dc8f5bd-9d0b-4087-9f73-dc164950bbd8',
@@ -29,11 +29,6 @@ const JOSH_HOMME: Artist = {
     disambiguation: null,
 };
 
-const QOTSA_FRONTMAN: Frontman = {
-    artist: JOSH_HOMME,
-    attributes: ['original'],
-};
-
 const DEFAULT_PATH: PathResult = {
     depth: 2,
     nodes: [QOTSA, JOSH_HOMME, BOWIE],
@@ -56,18 +51,6 @@ export async function setupApiMocks(page: Page): Promise<void> {
         const results = matchPrefix(q, [QOTSA, BOWIE, BOWIE_BAND]);
 
         await route.fulfill({ json: results });
-    });
-
-    await page.route('**/api/artists/*/frontman', async (route) => {
-        const url = new URL(route.request().url());
-        const mbid = url.pathname.split('/').at(-2);
-
-        if (mbid === QOTSA.mbid) {
-            await route.fulfill({ json: QOTSA_FRONTMAN });
-            return;
-        }
-
-        await route.fulfill({ json: null });
     });
 
     await page.route('**/api/paths?*', async (route) => {

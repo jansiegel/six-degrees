@@ -1,4 +1,4 @@
-import type { Frontman, PathEdge, PathResult } from '@/lib/db/types';
+import type { PathEdge, PathResult } from '@/lib/db/types';
 import { RELATION_TYPE_LABELS, relabelAttribute } from '@/lib/db/relations';
 
 export type BandRole = {
@@ -33,10 +33,7 @@ function edgeKey(fromMbid: string, toMbid: string): string {
     return `${fromMbid}|${toMbid}`;
 }
 
-export function buildPathEntries(
-    path: PathResult,
-    frontmen: [Frontman | null, Frontman | null],
-): PathNodeEntry[] {
+export function buildPathEntries(path: PathResult): PathNodeEntry[] {
     const edgesByDirection = new Map<string, PathEdge>();
 
     for (const edge of path.edges) {
@@ -51,24 +48,6 @@ export function buildPathEntries(
             const nextNode = path.nodes[i + 1];
 
             if (node.type !== 1) {
-                if (isFirst && frontmen[0] !== null && nextNode?.mbid !== frontmen[0].artist.mbid) {
-                    return {
-                        mbid: frontmen[0].artist.mbid,
-                        name: frontmen[0].artist.name,
-                        from: null,
-                        to: buildBandRole(node.name, frontmen[0].attributes),
-                    };
-                }
-
-                if (isLast && frontmen[1] !== null && previousNode?.mbid !== frontmen[1].artist.mbid) {
-                    return {
-                        mbid: frontmen[1].artist.mbid,
-                        name: frontmen[1].artist.name,
-                        from: buildBandRole(node.name, frontmen[1].attributes),
-                        to: null,
-                    };
-                }
-
                 return null;
             }
 
